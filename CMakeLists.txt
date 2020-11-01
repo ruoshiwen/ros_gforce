@@ -50,6 +50,9 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   EmgArray.msg
+  ImuArray.msg
+  Quaternion.msg
+  Euler.msg
 )
 
 ## Generate services in the 'srv' folder

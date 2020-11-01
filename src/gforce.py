@@ -192,6 +192,16 @@ NotifDataType = dict(
     NTF_PARTIAL_DATA = 0xFF
 )
 
+NotifDataLength = dict(
+    NTF_ACC_LEN = 12,
+    NTF_GYO_LEN = 12,
+    NTF_MAG_LEN = 12,
+    NTF_EULER_LEN = 12,
+    NTF_QUAT_FLOAT_LEN = 16,
+    NTF_ROTA_LEN = 36,
+    NTF_EMG_ADC_LEN = 128
+)
+
 LogLevel = dict(
     LOG_LEVEL_DEBUG = 0x00,
     LOG_LEVEL_INFO = 0x01,
@@ -488,7 +498,9 @@ class GForceProfile():
                 cb(resp,None)
 
         # Send data
+        print('EMG config return:',self.sendCommand(ProfileCharType.PROF_DATA_CMD,data,True,temp,timeout))
         return self.sendCommand(ProfileCharType.PROF_DATA_CMD,data,True,temp,timeout)
+        
     
     # Get Emg Raw Data Config
     def getEmgRawDataConfig(self,sampRate,channelMask,dataLen,resolution,cb,timeout):
