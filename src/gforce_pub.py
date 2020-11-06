@@ -21,7 +21,7 @@ def onData(data):
             # Wrap the EMG data into an EmgArray message
             emg_msg = EmgArray(h,emg_frame)
             emgPub.publish(emg_msg)        
-    '''
+
     elif data[0] == NotifDataType['NTF_QUAT_FLOAT_DATA'] and len(data) == NotifDataLength['NTF_QUAT_FLOAT_LEN'] + 1:
         quat = data[1:]
         h = Header()
@@ -40,7 +40,8 @@ def onData(data):
         h = Header()
         h.stamp = rospy.Time.now()
         h.frame_id = 'gf_acc'
-        acc_frame = struct.unpack('3l', acc)
+        acc_frame = struct.unpack('<3l', acc)
+        print(acc_frame)
         
         # Wrap the Accelerometer data into an ImuArray message
         acc_msg = ImuArray()
@@ -54,7 +55,7 @@ def onData(data):
         h = Header()
         h.stamp = rospy.Time.now()
         h.frame_id = 'gf_gyro'
-        gyro_frame = struct.unpack('3l', gyro)
+        gyro_frame = struct.unpack('<3l', gyro)
 
         # Wrap the Gyroscope data into an ImuArray message
         gyro_msg = ImuArray()
@@ -66,7 +67,7 @@ def onData(data):
         euler = data[1:]
         h = Header()
         h.stamp = rospy.Time.now()
-        h.frame_id = 'gf_gyro'
+        h.frame_id = 'gf_euler'
         euler_frame = struct.unpack('3f', euler)
         
         # Wrap the Quaterion data into an Euler message
@@ -74,7 +75,7 @@ def onData(data):
         euler_msg.header = h
         euler_msg.data = euler_frame
         eulerPub.publish(euler_msg)
-    '''
+    
 def set_cmd_cb(resp,respdata):
     print('Command result: {}'.format(resp))
 
@@ -86,12 +87,13 @@ if __name__ == '__main__':
     resolution = rospy.get_param("~resolution", 8)
     
     emg_topic = rospy.get_param("~emg_topic", "gf_emg")
-    '''
-    quat_topic = rospy.get_param("~quat_topic", "gf_quat")
     acc_topic = rospy.get_param("~acc_topic", "gf_acc")
+    
+    quat_topic = rospy.get_param("~quat_topic", "gf_quat")
+    
     gyro_topic = rospy.get_param("~gyro_topic", "gf_gyro")
     euler_topic = rospy.get_param("~euler_topic", "gf_euler")
-    '''
+    
     connected = 0
     while(connected==0):
         GF = GForceProfile()
@@ -112,15 +114,17 @@ if __name__ == '__main__':
     rospy.init_node('gf_pub_node')
     # Define the gforce publisher
     emgPub = rospy.Publisher(emg_topic, EmgArray, queue_size=20) # queue_size is set to 20 to guarantee the sampling rate
-    '''
+    accPub = rospy.Publisher(acc_topic, ImuArray, queue_size=10)
+    
     quatPub = rospy.Publisher(quat_topic, Quaternion, queue_size=10)
     eulerPub = rospy.Publisher(euler_topic, Euler, queue_size=10)
-    accPub = rospy.Publisher(acc_topic, ImuArray, queue_size=10)
+    
     gyroPub = rospy.Publisher(gyro_topic, ImuArray, queue_size=10)
-    '''
     
     
-    GF.setDataNotifSwitch(DataNotifFlags['DNF_EMG_RAW'],set_cmd_cb,2000)
+    
+    GF.setDataNotifSwitch(DataNotifFlags['DNF_ACCELERATE'] | DataNotifFlags['DNF_EMG_RAW']
+        | DataNotifFlags['DNF_QUATERNION'],set_cmd_cb,2000)
     try:
         GF.startDataNotification(onData) # startDataNotification gets one data packet, and uses ondata function to publish once
         rospy.spin()
