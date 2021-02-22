@@ -3,3 +3,8 @@ This ROS package creates a ROS node which publishes raw data from the OYMotion g
 These messages can be subscribed to and used in standard ROS architectures.
 
 Special thanks to OYMotion developers for building the communication interface of the python version under BLE protocol.
+
+## Requirements
+bluepy
+Tested on Ubuntu 16.04 and ROS Kinetic.
+
